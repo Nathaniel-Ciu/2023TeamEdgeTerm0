@@ -29,7 +29,7 @@ After this program finishes running, it should output a specific total for each 
 	Nathaniel Ciu 7/11/23
 
 	BUGS TO FIX
-	groupSize accepts non-numbers
+	groupSize accepts non-numbers (probable solution - do something with parseInt)
 	Tax is calculated after tip, IDK if that's the norm - research how tax works 
 
 	NOTE 
@@ -83,7 +83,7 @@ let comparisionMenuForCheck = ["Hamburger",  "Cheeseburger", "Porkchops", "Infer
 
 function checkGroupSizeInput() { //Fix so groupSize doesn't accept characters 
 	try {
-		if (groupSize < 0 ) {
+		if (groupSize <= 0 ) {
 			throw new Error("");
 		}
 	} catch {
@@ -208,7 +208,7 @@ function personCalculateTotalPrice() { // Different list is accesses for individ
 
 
 const READLINE = require("readline-sync");
-console.log("***** Welcome to Eric's Eatery *****");
+console.log("\n***** Welcome to Eric's Eatery *****");
 let name = READLINE.question("Enter your name: ");
 let groupSize = READLINE.question("How many people eating today?: "); 
 checkGroupSizeInput();
@@ -242,7 +242,7 @@ if (wantGroupTab == "YES") { // GROUP PAY
 		checkWantOrderInput();
 	}
 	console.log("\nTips are OPTIONAL (We pay our workers fair wages)");
-	tip = READLINE.question("Leave 0% | 15% | 18% | 20% | Custom (Enter Any #) Tip: ");
+	tip = READLINE.question("Leave 0% | 15% | 18% | 20% | Custom (Enter Any # without %) : ");
 	checkTipInput();
 
 
@@ -265,14 +265,14 @@ if (wantGroupTab == "YES") { // GROUP PAY
 			tempTablePrice += InfernoWings.price;
 		}
 	}
-	costWithTip = calculateTotalPrice() + calculateTotalPrice() * (tip / 100);
-	costWithTipAndTax = costWithTip + (costWithTip * tax / 100);
+	costWithTax = calculateTotalPrice() + calculateTotalPrice() * (tax / 100);
+	costWithTaxAndTip = costWithTax + (costWithTax * tip / 100);
 
-	console.log("\nPrice before tip : " + tempTablePrice);
+	console.log("\nPrice before tax : " + tempTablePrice);
 	
-	console.log("\nTip is " + tip + "%")
-	console.log("Price w/ tip : " + costWithTip.toFixed(2));
-	console.log("Pirce w/ tax : " + costWithTipAndTax.toFixed(2));
+	console.log("Price after tax : " + costWithTax.toFixed(2));
+	console.log("Tipped " + tip + "%");
+	console.log("Price w/ tip : " + costWithTaxAndTip.toFixed(2));
 	
 
 
@@ -297,7 +297,7 @@ if (wantGroupTab == "YES") { // GROUP PAY
 			checkWantOrderInput();
 		}
 		console.log("\nTips are OPTIONAL (We pay our workers fair wages)");
-		tip = READLINE.question("Leave 0% | 15% | 18% | 20% | Custom (Enter Any #) Tip: "); // doesn't check for invalid check
+		tip = READLINE.question("Leave 0% | 15% | 18% | 20% | Custom (Enter Any # without %) : ");
 		checkTipInput();
 		person.tip = tip;
 		person.cost = personCalculateTotalPrice() + personCalculateTotalPrice() * (tip / 100) + ((personCalculateTotalPrice() + personCalculateTotalPrice() * (tip / 100)) * (tax / 100));
@@ -326,13 +326,14 @@ if (wantGroupTab == "YES") { // GROUP PAY
 			}
 		}
 
-		console.log("\nPrice before tip : " + priceForIndividual);
+		console.log("\nPrice before tax : " + priceForIndividual);
 
-		priceWithTip = priceForIndividual + priceForIndividual * (people[outer].tip / 100);
-		priceWithTipAndTax = priceWithTip + priceWithTip * (tax / 100);
-		console.log("\nTip is " + people[outer].tip);
-		console.log("Price w/ Tip : " + priceWithTip.toFixed(2));
-		console.log("Price w/ tax : " + priceWithTipAndTax.toFixed(2) + "\n")
+		priceWithTax = priceForIndividual + priceForIndividual * (tax / 100);
+		priceWithTaxAndTip = priceWithTax + priceWithTax * (people[outer].tip / 100);
+		console.log("Price after tax : " + priceWithTax.toFixed(2) + "\n")
+		console.log("Tipped " + people[outer].tip);
+		console.log("Price w/ Tip : " + priceWithTaxAndTip.toFixed(2));
+		
 		
 	}
 
