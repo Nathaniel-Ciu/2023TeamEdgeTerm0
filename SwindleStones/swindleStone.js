@@ -27,13 +27,43 @@ const validGuess = [ // This is me trying to make it not a mess | Future me, I'm
 ]
 // Note: Higher index beats lower index (check rules for SwindleStone / Liar's Dice) 
 
+// const dicePics = [
+//     ``, // so the indexes line up with the value of dice shown
+//     `_____
+//     |     |
+//     |  •  |
+//     |_____|`, // 1
+//     `_____
+//     |•    |
+//     |     |
+//     |____•|`, // 2
+//     `_____
+//     |•    |
+//     |  •  |
+//     |____•|`, // 3
+//     `_____
+//     |•  • |
+//     |     |
+//     |•__•_|`, // 4
+//     `_____
+//     |•   •|
+//     |  •  |
+//     |•___•|`, // 5
+//     `_____
+//     |•  • |
+//     |•  • |
+//     |•__• |`  // 6
+// ]
+
 const READLINE = require("readline-sync");
+
+
 
 
 // player variables 
 let playerDiceCount = 5; // subj to change
 let playerRoll = [];
-let playerResponse; 
+let playerResponse = ``; 
 
 // bot variables 
 let botDiceCount = 5; // subj to change
@@ -44,11 +74,10 @@ let botThrees = 0;
 let botFours = 0;
 let botFives = 0;
 let botSixes = 0;
-let playerMoves = [];
-let counter = 0; // don't remember why we need this | but if used this will have to reset during the match 
+// let playerMoves = [];
+// let counter = 0; // don't remember why we need this | but if used this will have to reset during the match 
 
 // For bot to make moves
-let botMove;
 let botAmountOfNum;
 let botNum;
 
@@ -84,7 +113,6 @@ function bot(dumHumanPlay) { // bot doesn't check player claim history
         movesCalled.push(botClaim);
         return  `\nBot: ${botClaim}`;
     }
-    console.log(`\nBot thinking...`);
     if (movesCalled.length == 0) {
         botClaim = validGuess[botClaims()]
         movesCalled.push(botClaim);
@@ -92,14 +120,12 @@ function bot(dumHumanPlay) { // bot doesn't check player claim history
     } 
     if (amountOfNum > totalDiceInPlay) {
         // bot will call (because player claim is bs)
-        // console.log(`Bot calls because that claim is total bs`);
         return `call`;
     } else {
         // console.log(`\nPlayer claim not bs`);
         botCheckBotRoll(); // update bot's known rolled values 
         if (botRollMatchPlayerInput()) {  // if player is right 
-
-            // console.log(`Bot responds with own claim because it has claimed values`);
+            // Bot responds with own claim because it has claimed values
             botClaim = validGuess[botClaims()]
             movesCalled.push(botClaim);
             return  `\nBot: ${botClaim}`;
@@ -107,11 +133,10 @@ function bot(dumHumanPlay) { // bot doesn't check player claim history
             calculatePlayerProbability();
             // console.log(`\nProbabilty player is right is ${playerProbability}\n`);
             if (Math.random() > playerProbability) {
-                // console.log(`Bot calls because it's improbable`);
+                // Bot calls because it's improbable
                 return `call`;
             } else {
                 // bot responds with its own claim 
-                // console.log(`Bot responds with own claim because it's probable`);
                 botClaim = validGuess[botClaims()]
                 movesCalled.push(botClaim);
                 return  `\nBot: ${botClaim}`;
@@ -125,14 +150,11 @@ function bot(dumHumanPlay) { // bot doesn't check player claim history
 
 // bot claims should be structured the same way as player claims 
 function botClaims() { // returns bestMoveIndex (int)
-    // let index;
+
     let bestMoveProb = -100000000000; 
     let bestMoveIndex;
     let lastMoveCalledIndex; // stores the index of the last element in movedCalled in validGuess (Confusing ik ik im sry)
-    // if (movesCalled.length == 0) {
-    //     index = Math.round(Math.random() * 5);
-    //     return `${validGuess[index]}`;
-    // } else if (movesCalled.length > 0) {
+    
     if (movesCalled.length != 0) { 
         lastMoveCalledIndex = validGuess.indexOf(movesCalled[movesCalled.length - 1]); // stores the index of the last element in movedCalled in validGuess (Confusing ik ik im sry)
     } else {
@@ -140,19 +162,17 @@ function botClaims() { // returns bestMoveIndex (int)
     }
     lookInAdvance = Math.round(Math.random() * 10); // so bot isn't too predictable or hard to beat
     for (let index = lastMoveCalledIndex + 1; index < (lastMoveCalledIndex + lookInAdvance) && index < validGuess.length; index++) {
+        
         challengingClaimProb = calcuateBotPossibleClaim(index);
         
-        // console.log(`index is ${index}`);
-        // console.log(`calculuating probablity for ${validGuess[index]}`);
-        // console.log(`challengingClaimProb is ${challengingClaimProb}`);
-
         if (challengingClaimProb > bestMoveProb) {
             bestMoveIndex = index; 
             bestMoveProb = challengingClaimProb;
         }
+
     }
-    //     }
-    // }
+    
+
     if (isNaN(validGuess[bestMoveIndex])) { // temp fix 
         // console.log(`bestMoveIndex is ${bestMoveIndex}`);
         bestMoveIndex = lastMoveCalledIndex + 1;
@@ -162,15 +182,13 @@ function botClaims() { // returns bestMoveIndex (int)
     botNum = botTranslatorValid2(validGuess[bestMoveIndex]);
     
     return bestMoveIndex;
-    
-
 }
 
 
 function calcuateBotPossibleClaim(offset) { // not accurate
     let botProbability = 0; // to reset past calculations 
+    
     // recieve the next possible claim
-
     botAmountOfNum = botTranslatorValid1(validGuess[offset]);
     botNum = botTranslatorValid2(validGuess[offset]);
 
@@ -194,7 +212,7 @@ function calcuateBotPossibleClaim(offset) { // not accurate
 
     if (botNeeds == 1) { // bot needs player to roll one of that value to sastify claim
         botProbability += 1 - (5/6) ** playerDiceCount;
-    } else { 
+    } else { // formula explaination in calculatePlayerProbability()
         for (let counter = botNeeds; counter <=  playerDiceCount; counter++) {
             botProbability += combination(playerDiceCount, counter) * ((1/6) ** counter) * ((5/6) ** (playerDiceCount - counter));
         }
@@ -227,7 +245,6 @@ function calculatePlayerProbability() { // not accurate
         throw new Error(`How did we get that?`);
     }
     
-    // console.log(`\nplayerNeed before after considering bot hand: ${playerNeeds}`);
 
     if (playerNeeds == 1) { // player needs to roll one of that value to sastify claim
         playerProbability += 1 - (5/6) ** playerDiceCount;
@@ -273,12 +290,12 @@ function botRollMatchPlayerInput() {
             counter++ 
         }
     }
-    return counter >= amountOfNum; // 
+    return counter >= amountOfNum; 
 }
 
 
 function botCheckBotRoll() { // i think this works didn't check tho
-    // I think we have to reset values to make it work?
+    // we have to reset values to make it work
     let botOnes = 0;
     let botTwos = 0;
     let botThrees = 0;
@@ -305,10 +322,8 @@ function botCheckBotRoll() { // i think this works didn't check tho
             throw new Error(`How did we roll that?`);
         }
     }
-    // console.log(`Amount of ones after checkBotRoll ${ones}`);
 }
 
-//see if need
 function botTranslatePlayerPart1() { // assumes playerResponse is valid (so check playerResponse before calling this)
     if (playerResponse.includes(`one`)) {
         return 1; 
@@ -437,8 +452,20 @@ function printOpponentRoll() {
     return `\nBot's roll: \n${tempString} \n`;
 }
 
+function printQuestions() {
+    let tempString = ``;
+    for (let offset = 0; offset < botDiceCount; offset++) {
+        if (offset == botDiceCount - 1) {
+            tempString += `?`;
+        } else {
+            tempString += `?, `;
+        }
+    }
+    return tempString;
+}
+
 function playerMove() {
-    playerResponse = READLINE.question(`Your turn\n`);
+    playerResponse = READLINE.question(`Your turn: `);
     playerResponse = playerResponse.toLowerCase();
 }
 
@@ -465,16 +492,14 @@ function checkValidMove(move) {
         } else if (move == `call` && movesCalled.length == 0) {
             throw new Error(`Can't call on first move`);
         }
-    } catch {
-        console.log(`\nThat move is invalid or cannot be played. Please input the amount of times and then the #. \nEx. one 1 or three 4's \nInput "Valid Moves" for a list of moves you can perform \n`);
+    } catch { //catching error
+        console.log(`\nThat move is invalid or is lower than the perivous guess. Please first type the how many times you think a number appears and then the number. Or "call" if you want to call.\nEx. "one 1" or "three 4's" \nInput "Valid Moves" for a list of moves you can perform \n`);
         playerMove();
         checkValidMove(playerResponse);
     }
 }
 
 function checkCall(lastMoveWas) {
-    // movesCalled[]
-
 
     totalOnes = 0;
     totalTwos = 0;
@@ -520,65 +545,76 @@ function checkCall(lastMoveWas) {
     }
 
 
-    console.log(`totalOnes ${totalOnes}`);
-    console.log(`totalTwos ${totalTwos}`);
-    console.log(`totalThrees ${totalThrees}`);
-    console.log(`totalFours ${totalFours}`);
-    console.log(`totalFives ${totalFives}`);
-    console.log(`totalSixes ${totalSixes}`);
+    // console.log(`\ntotalOnes ${totalOnes}`);
+    // console.log(`totalTwos ${totalTwos}`);
+    // console.log(`totalThrees ${totalThrees}`);
+    // console.log(`totalFours ${totalFours}`);
+    // console.log(`totalFives ${totalFives}`);
+    // console.log(`totalSixes ${totalSixes}`);
+    // console.log(`amountOfNum is ${amountOfNum}`);
+    // console.log(`num is ${num}`);
 
     if (lastMoveWas == `player`) { // check player vars
-        console.log(`Bot has called`);
-        // different ammountOfNum and num vars (not the global ones)
-        // let amountOfNum = botTranslatorPart1(movesCalled[movesCalled.length - 1]);
-        // let num = botTranslatorPart2(movesCalled[movesCalled.length - 1]);
+        console.log(`Bot: call \n`);
+        
         if (num == 1) {
-            if (amountOfNum <= totalOnes)  { // losing condition for player claim
+            if (amountOfNum <= totalOnes)  { 
                 removeBotDice();
+                console.log(`There are at least ${playerResponse}!`);
                 return `bot`;
             } else {
                 removePlayerDice();
+                console.log(`There aren't at least ${playerResponse}!`);
                 return `player`;
             }
         } else if (num == 2) {
-            if (amountOfNum <= totalTwos)  { // losing condition for player claim
+            if (amountOfNum <= totalTwos)  { 
                 removeBotDice();
+                console.log(`There are at least ${playerResponse}!`);
                 return `bot`;
             } else {
                 removePlayerDice();
+                console.log(`There aren't at least ${playerResponse}!`);
                 return `player`;
             }
         } else if (num == 3) {
-            if (amountOfNum <= totalThrees)  { // losing condition for player claim
+            if (amountOfNum <= totalThrees)  { 
                 removeBotDice();
+                console.log(`There are at least ${playerResponse}!`);
                 return `bot`;
             } else {
                 removePlayerDice();
+                console.log(`There aren't at least ${playerResponse}!`);
                 return `player`;
             }
         } else if (num == 4) {
-            if (amountOfNum <= totalFours)  { // losing condition for player claim
+            if (amountOfNum <= totalFours)  { 
                 removeBotDice();
+                console.log(`There are at least ${playerResponse}!`);
                 return `bot`;
             } else {
                 removePlayerDice();
+                console.log(`There aren't at least ${playerResponse}!`);
                 return `player`;
             }
         } else if (num == 5) {
-            if (amountOfNum <= totalFives)  { // losing condition for player claim
+            if (amountOfNum <= totalFives)  { 
                 removeBotDice();
+                console.log(`There are at least ${playerResponse}!`);
                 return `bot`;
             } else {
                 removePlayerDice();
+                console.log(`There aren't at least ${playerResponse}!`);
                 return `player`;
             }
         } else if (num == 6) {
-            console.log(`amountOfNum is ${amountOfNum}` );
-            if (amountOfNum <= totalSixes)  { // losing condition for player claim
+            if (amountOfNum <= totalSixes)  { 
                 removeBotDice();
+                console.log(`There are at least ${playerResponse}!`);
                 return `bot`;
             } else {
                 removePlayerDice();
+                console.log(`There aren't at least ${playerResponse}!`);
                 return `player`;
             }
         } else {
@@ -587,68 +623,74 @@ function checkCall(lastMoveWas) {
     }
 
     if (lastMoveWas == `bot`) { // check bot vars
-        console.log(`player has called`);
-        console.log(`botNum is ${botNum}`);
-        console.log(`botAmountofNum is ${botAmountOfNum}`)
-        // botNum++; // bot num is index? idk why it's consistently 1 lower
+        console.log(`\nPlayer has called\n`);
+
         if (botNum == 1) {
-            if (botAmountOfNum <= totalOnes)  { // winning condition for player claim
-                removePlayerDice(); //
+            if (botAmountOfNum <= totalOnes)  { 
+                removePlayerDice(); 
+                console.log(`There are at least ${botResponse.substr(6)}!`);
                 return `player`;
             } else {
                 removeBotDice();
+                console.log(`There aren't at least ${botResponse.substr(6)}!`);
                 return `bot`;
             }
         } else if (botNum == 2) {
-            if (botAmountOfNum <= totalTwos)  { // winning condition for player claim
+            if (botAmountOfNum <= totalTwos)  { 
                 removePlayerDice();
+                console.log(`There are at least ${botResponse.substr(6)}!`);
                 return `player`;
             } else {
                 removeBotDice();
+                console.log(`There aren't at least ${botResponse.substr(6)}!`);
                 return `bot`;
             }
         } else if (botNum == 3) {
-            if (botAmountOfNum <= totalThrees)  { // winning condition for player claim
+            if (botAmountOfNum <= totalThrees)  { 
                 removePlayerDice();
+                console.log(`There are at least ${botResponse.substr(6)}!`);
                 return `player`;
             } else {
                 removeBotDice();
+                console.log(`There aren't at least ${botResponse.substr(6)}!`);
                 return `bot`;
             }
         } else if (botNum == 4) {
-            if (botAmountOfNum <= totalFours)  { // winning condition for player claim
+            if (botAmountOfNum <= totalFours)  { 
                 removePlayerDice();
+                console.log(`There are at least ${botResponse.substr(6)}!`);
                 return `player`;
             } else {
                 removeBotDice();
+                console.log(`There aren't at least ${botResponse.substr(6)}!`);
                 return `bot`;
             }
         } else if (botNum == 5) {
-            if (botAmountOfNum <= totalFives)  { // winning condition for player claim
+            if (botAmountOfNum <= totalFives)  { 
                 removePlayerDice();
+                console.log(`There are at least ${botResponse.substr(6)}!`);
                 return `player`;
             } else {
                 removeBotDice();
+                console.log(`There aren't at least ${botResponse.substr(6)}!`);
                 return `bot`;
             }
-        } else if (botNum == 6) { // at least 2 sixes >
-            if (botAmountOfNum <= totalSixes)  { // winning condition for player claim
+        } else if (botNum == 6) { 
+            if (botAmountOfNum <= totalSixes)  { 
                 removePlayerDice(); 
+                console.log(`There are at least ${botResponse.substr(6)}!`);
                 return `player`;
             } else {
                 removeBotDice();
+                console.log(`There aren't at least ${botResponse.substr(6)}!`);
                 return `bot`;
             }
         } else {
-
             throw new Error(`How did we roll that?`);
         } 
     }
 }
 
-function helperCompare(passedNum) {
-    
-}
 
 function removePlayerDice() {
     console.log(`Player has lost a dice!`);
@@ -660,26 +702,166 @@ function removeBotDice() {
     botDiceCount--;
 }
 
+function checkYesNo(input) {
+    while (input != `yes` && input != `no`) {
+        input = READLINE.question(`Please enter "Yes" or "No"\n`);
+        input = input.toLowerCase();
+    } 
+    return input
+}
+
+function cont() {
+    contin = READLINE.question(`\nPress enter to continue \n`);
+}
+
+function resetVars() { // only important vars get reset
+    playerRoll = []; 
+    botRoll = []; 
+    playerResponse = ``;
+    movesCalled = [];
+}
+
+function revealAllDice() {
+    console.log(`\nBot's Roll was `)
+    console.log(`${printArray(botRoll)}`);
+    console.log(`\nYour Roll was `);
+    console.log(`${printArray(playerRoll)}\n`);
+}
+
+function welcome() {
+    console.log(`\nWelcome to Swindle Stones! (Also known as liar's dice)`);
+    tutorial = READLINE.question(`\nWould you like a  tutorial? (Yes / No) \n`);
+    tutorial = tutorial.toLowerCase();
+    tutorial = checkYesNo(tutorial); 
+
+    if (tutorial == `yes`) {
+        tutorialSim();
+    }
+}
+
+function printDiceValues() {
+    console.log(printOpponentRoll());
+    console.log(`Your Roll`);
+    console.log(`${printArray(playerRoll)}`);
+}
+
+function resetGame() {
+    playerDiceCount = 5; // subj to change
+    playerRoll = [];
+    playerResponse = ``; 
+}
+
+function firstGoesAfterLoss() {
+    if (loser == `player`) {
+        gameState = `player turn`;
+    } else if (loser == `bot`) {
+        gameState = `bot turn`;
+    } else {
+        throw new Error(`who's the loser????`);
+    }
+}
+
+function tutorialSim() {
+    //line for line sake
+    console.log(`--------------------------------------------------------------------------------------------------------------`);
+    console.log(`***** Tutorial ****`);
+    console.log(`\nIn Swindle Stones (or liar's dice) each player initally recieves 5 die (six sided).\n`);
+    
+    
+    console.log(`Bot's Roll`);
+    console.log(printQuestions());
+    console.log(`\nYour Roll`);
+    console.log(printQuestions());
+
+    cont();
+
+    // console.log(`--------------------------------------------------------------------------------------------------------------`);
+    console.log(`\nYou only to get to see the values that you roll`);
+
+    rollDice();
+
+    printDiceValues();
+
+    cont();
+
+    console.log(`\nEach player takes turn guessing how mamy times a number is rolled. (Ex. "one 1" or "three 4's" | Typing Your Guesses: First type how many times you think a number is rolled, followed by the actual number)`);
+
+    console.log(`\nLet's see what your opponent guesses`);
+    botResponse = bot(playerResponse)
+    console.log(botResponse);
+
+    printDiceValues();
+
+    cont();
+
+    console.log(`\nYou can either "call" if you think your opponent's guess is "wrong" (only overestimating how many times a number appears is wrong) or guess yourself, but your guess must be higher than the pevious guess. (Ex. "one 5" is higher than "one 1" and "two 1's" is higher than "one 5"`);
+    
+    printDiceValues();
+
+    console.log(`\nTry making a move!`);
+    playerMove();
+    checkValidMove(playerResponse);
+
+    console.log(`\nNice!`);
+
+    if (playerResponse ==  `call`) {
+        console.log(`\nYou decide to call!`);
+        cont();
+
+        console.log(`\nWhen someone calls out a guess all dice values are revealed and we check to see if the guess is "wrong". If the guess is wrong the player who made the guess loses a dice. If the guess is right the player who called the guess out loses a dice.`);
+
+        loser = checkCall(`bot`);
+
+        revealAllDice();
+
+    } else {
+        console.log(`Let's see what the bot does!`);
+        cont();
+
+        console.log(`\nThe bot decides to call!`);
+
+        console.log(`\nWhen someone calls out a guess all dice values are revealed and we check to see if the guess is "wrong". If the guess is wrong the player who made the guess loses a dice. If the guess is right the player who called the guess out loses a dice.`);
+
+        // doesn't translate (bot usually does it but i don't wanna call it again) so this here
+        amountOfNum = botTranslatePlayerPart1(); 
+        num = botTranslatePlayerPart2();
+
+        loser = checkCall(`player`);
+
+        revealAllDice();
+    }
+
+    cont();
+
+    console.log(`After a call, dice are rolled for new values and the player who most recently lost a dice goes first.`);
+
+    resetVars();
+    rollDice();
+    printDiceValues();
+
+
+    cont();
+
+    console.log(`\nThe game ends when the opposing player loses all of their dice`);
+
+    console.log(`\nNow that you know how to play, play the rest of this game!`);
+
+    firstGoesAfterLoss();
+    
+    // goes right into gameSim();
+
+}
+
 function gameSim() {
 
-    gameState = `player turn`;
-
-    rollDice(); // for first round
+    if (gameState == ``) {
+        gameState = `player turn`;
+        rollDice(); // for first round
+    }
                 
-    // Rolling  | NOTE SHOULD ONLY ROLL ONCE PER ROUND
-
     while (playerDiceCount > 0 && botDiceCount > 0) {
 
-       
-
-
         while (gameState == `player turn`) {
-            // Rolling  | NOTE SHOULD ONLY ROLL ONCE PER ROUND
-
-            // ***** Note to self: Make it so they take turns going first ****
-            // rollDice(); 
-            // console.log(printOpponentRoll());
-            // console.log(`\nBot's Roll`)
             console.log(printOpponentRoll());
             console.log(`Your Roll`);
             console.log(`${printArray(playerRoll)}\n`);
@@ -687,14 +869,11 @@ function gameSim() {
             // Player's Turn
             playerMove();
             checkValidMove(playerResponse);
-            playerMoves.push(playerResponse); // for bot (maybe?)
-            // console.log(`So your move is \n${playerResponse}*`); checking if readline records spaces after input (it doesn't)
             
             if (playerResponse == `call`) {
-                // reveal dice and take away loser's dice 
                 gameState = `player call`;
             }  else {
-                gameState = `bot turn` 
+                gameState = `bot turn`;
             }
 
         }
@@ -717,10 +896,7 @@ function gameSim() {
         if (gameState == `player call`) {
             loser = checkCall(`bot`);
 
-            console.log(`\nBot's Roll was `)
-            console.log(`${printArray(botRoll)}`);
-            console.log(`Your Roll was `);
-            console.log(`${printArray(playerRoll)}\n`);
+            revealAllDice();
 
             gameState = `new roll`;
 
@@ -729,55 +905,45 @@ function gameSim() {
 
             loser = checkCall(`player`);
 
-            console.log(`\nBot's Roll was `)
-            console.log(`${printArray(botRoll)}`);
-            console.log(`Your Roll was `);
-            console.log(`${printArray(playerRoll)}\n`);
+            revealAllDice();
 
             gameState = `new roll`;
         } else if (gameState == `new roll`) {
+            cont();
             // old dice values erased 
             console.log(`Next Round!`);
-            playerRoll = []; 
-            botRoll = []; 
-            playerResponse = ``;
-            // amountOfNum = undefined;
-            
-
-            // old move history erased (to check if valid call)
-            movesCalled = [];
+            resetVars();
 
             // new dice values assigned 
             rollDice(); 
-            if (loser == `player`) {
-                gameState = `player turn`;
-            } else if (loser == `bot`) {
-                gameState = `bot turn`;
-            } else {
-                throw new Error(`who's the loser????`);
-            }
+            firstGoesAfterLoss();
         }
-
-
     }
-    
 
+    if (playerDiceCount == 0) {
+        console.log(`\nBot wins!`);
+    } else if (botDiceCount == 0) {
+        console.log(`\nYou win!`);
+    }
+}
+
+function goodbye() {
+    console.log(`\nThanks For Playing Swindle Stones! Can't wait to play again! \n`);
 }
 
 function main() {
+    keepPlaying = `yes`;
     console.log(`******* NEW TEST *******`)
-    // rollDice();
-    // console.log(`Bot Roll is : `);
-    // console.log(printArray(botRoll));
-    // console.log();
-    // console.log(`Player Roll is:`);
-    // console.log(printArray(playerRoll));
-    // console.log(Math.random() * 1);
-    gameSim();
-    // console.log(bot(`one 1`));
-    // console.log(`botClaim is ${botClaims()}`);
-    // console.log((1/6) ** botDiceCount);
-    // console.log(`player move is : ${playerResponse}`);
+
+    welcome();
+    while (keepPlaying ==  `yes`) {
+        gameSim();
+        keepPlaying = READLINE.question(`\nWould you like to play again? (Yes / No)\n`);
+        keepPlaying = keepPlaying.toLowerCase();
+        keepPlaying = checkYesNo(keepPlaying);
+        resetGame();
+    }
+    goodbye();
 }
 
 main();
