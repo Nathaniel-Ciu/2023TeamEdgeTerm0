@@ -58,7 +58,7 @@ const validGuess = [ // This is me trying to make it not a mess | Future me, I'm
 const READLINE = require("readline-sync");
 
 
-
+// Note to self not all variables are listed here (At least I didn't make sure they are all listed here)
 
 // player variables 
 let playerDiceCount = 5; // subj to change
@@ -74,8 +74,6 @@ let botThrees = 0;
 let botFours = 0;
 let botFives = 0;
 let botSixes = 0;
-// let playerMoves = [];
-// let counter = 0; // don't remember why we need this | but if used this will have to reset during the match 
 
 // For bot to make moves
 let botAmountOfNum;
@@ -98,6 +96,7 @@ let totalFours = 0;
 let totalFives = 0;
 let totalSixes = 0;
 let loser;
+let keepPlaying;
 
 
 
@@ -493,7 +492,11 @@ function checkValidMove(move) {
             throw new Error(`Can't call on first move`);
         }
     } catch { //catching error
-        console.log(`\nThat move is invalid or is lower than the perivous guess. Please first type the how many times you think a number appears and then the number. Or "call" if you want to call.\nEx. "one 1" or "three 4's" \nInput "Valid Moves" for a list of moves you can perform \n`);
+        if (move == `valid guesses` || move ==  `valid guess` || move == ``) {
+            console.log(displayValidMoves());
+        } else {
+            console.log(`\nThat move is invalid or is lower than the perivous guess. Please first type the how many times you think a number appears and then the number. Or "call" if you want to call.\nEx. "one 1" or "three 4's" \nInput "Valid Guesses" for a list of valid guesses.\n`);
+        }
         playerMove();
         checkValidMove(playerResponse);
     }
@@ -761,11 +764,27 @@ function firstGoesAfterLoss() {
     }
 }
 
+function displayValidMoves() {
+    let tempString = `Some valid guesses include: `;
+    let last = movesCalled[movesCalled.length - 1];
+    let indexOfLastMove = validGuess.indexOf(last); 
+
+    for (let index = indexOfLastMove + 1; index < indexOfLastMove + 6; index++) {
+        if (index == indexOfLastMove + 5) {
+            tempString += `${validGuess[index]}`;
+        } else {
+            tempString += `${validGuess[index]}, `;
+        }
+    }
+    tempString += `\n`;
+    return tempString;
+}
+
 function tutorialSim() {
     //line for line sake
     console.log(`--------------------------------------------------------------------------------------------------------------`);
     console.log(`***** Tutorial ****`);
-    console.log(`\nIn Swindle Stones (or liar's dice) each player initally recieves 5 die (six sided).\n`);
+    console.log(`\nIn Swindle Stones (also known as liar's dice) each player initally recieves 5 die (six sided).\n`);
     
     
     console.log(`Bot's Roll`);
@@ -784,7 +803,7 @@ function tutorialSim() {
 
     cont();
 
-    console.log(`\nEach player takes turn guessing how mamy times a number is rolled. (Ex. "one 1" or "three 4's" | Typing Your Guesses: First type how many times you think a number is rolled, followed by the actual number)`);
+    console.log(`\nEach player takes turn guessing how many times a number is rolled (in total considering your known values and the opponent's unknown values). (Ex. "one 1" or "three 4's" | Note on Typing Your Guesses: First type how many times you think a number is rolled, followed by the actual number + 's)`);
 
     console.log(`\nLet's see what your opponent guesses`);
     botResponse = bot(playerResponse)
@@ -794,7 +813,7 @@ function tutorialSim() {
 
     cont();
 
-    console.log(`\nYou can either "call" if you think your opponent's guess is "wrong" (only overestimating how many times a number appears is wrong) or guess yourself, but your guess must be higher than the pevious guess. (Ex. "one 5" is higher than "one 1" and "two 1's" is higher than "one 5"`);
+    console.log(`\nYou can either "call" if you think your opponent's guess is "wrong" (Note: only overestimating how many times a number appears is wrong) or guess yourself, but your guess must be higher than the previous guess. (Ex. "one 5" is higher than "one 1" and "two 1's" is higher than "one 5"`);
     
     printDiceValues();
 
@@ -854,7 +873,8 @@ function tutorialSim() {
 
 function gameSim() {
 
-    if (gameState == ``) {
+    if (gameState == `playing`) {
+        console.log(`\nGood Luck Have Fun!`);
         gameState = `player turn`;
         rollDice(); // for first round
     }
@@ -869,6 +889,7 @@ function gameSim() {
             // Player's Turn
             playerMove();
             checkValidMove(playerResponse);
+            
             
             if (playerResponse == `call`) {
                 gameState = `player call`;
@@ -933,7 +954,7 @@ function goodbye() {
 
 function main() {
     keepPlaying = `yes`;
-    console.log(`******* NEW TEST *******`)
+    // console.log(`******* NEW TEST *******`)
 
     welcome();
     while (keepPlaying ==  `yes`) {
