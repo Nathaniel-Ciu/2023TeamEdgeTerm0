@@ -1,3 +1,9 @@
+/*
+Made by Nathaniel Ciu
+2023/08/03
+Comments should help explain code and disclaim stuff (but no promises future me! Have fun updating/maintaining this! >:) Sorry in advance)
+*/
+
 // valid Guesses for 5 dices
 const validGuess = [ // This is me trying to make it not a mess | Future me, I'm sorry I didn't do this better
 `one 1`, `one 2`, `one 3`, `one 4`, `one 5`, `one 6`, 
@@ -58,7 +64,7 @@ const validGuess = [ // This is me trying to make it not a mess | Future me, I'm
 const READLINE = require("readline-sync");
 
 
-// Note to self not all variables are listed here (At least I didn't make sure they are all listed here)
+// ******* Note to self not all variables are listed here (At least I didn't make sure they are all listed here) *********
 
 // player variables 
 let playerDiceCount = 5; // subj to change
@@ -99,7 +105,7 @@ let loser;
 let keepPlaying;
 
 
-
+// ***** Note to self the functions may be defined in places considered nonsensical, don't expect them to be ordered in a sensical way *****
 
 function bot(dumHumanPlay) { // bot doesn't check player claim history
     counter = 0;
@@ -121,7 +127,7 @@ function bot(dumHumanPlay) { // bot doesn't check player claim history
         // bot will call (because player claim is bs)
         return `call`;
     } else {
-        // console.log(`\nPlayer claim not bs`);
+        // Player claim not bs`
         botCheckBotRoll(); // update bot's known rolled values 
         if (botRollMatchPlayerInput()) {  // if player is right 
             // Bot responds with own claim because it has claimed values
@@ -130,7 +136,7 @@ function bot(dumHumanPlay) { // bot doesn't check player claim history
             return  `\nBot: ${botClaim}`;
         } else { // if there's a chance the player is false, calcuate chance its true and respond in accordance
             calculatePlayerProbability();
-            // console.log(`\nProbabilty player is right is ${playerProbability}\n`);
+            // Probabilty player is right is ${playerProbability}
             if (Math.random() > playerProbability) {
                 // Bot calls because it's improbable
                 return `call`;
@@ -142,8 +148,6 @@ function bot(dumHumanPlay) { // bot doesn't check player claim history
             }
         }
     }
-    
-
 }
 
 
@@ -172,8 +176,7 @@ function botClaims() { // returns bestMoveIndex (int)
     }
     
 
-    if (isNaN(validGuess[bestMoveIndex])) { // temp fix 
-        // console.log(`bestMoveIndex is ${bestMoveIndex}`);
+    if (isNaN(validGuess[bestMoveIndex])) { // temp fix (bestMoveIndex occasionally doesn't get assigned a value for a reason I didn't figure out yet)
         bestMoveIndex = lastMoveCalledIndex + 1;
     }
 
@@ -187,7 +190,7 @@ function botClaims() { // returns bestMoveIndex (int)
 function calcuateBotPossibleClaim(offset) { // not accurate
     let botProbability = 0; // to reset past calculations 
     
-    // recieve the next possible claim
+    // recieve the next possible claim bot can make
     botAmountOfNum = botTranslatorValid1(validGuess[offset]);
     botNum = botTranslatorValid2(validGuess[offset]);
 
@@ -225,7 +228,7 @@ function calcuateBotPossibleClaim(offset) { // not accurate
 function calculatePlayerProbability() { // not accurate 
     playerProbability = 0; // to reset past calculations 
 
-    // we have already check if bot roll has sastified player claim
+    // at this point we should have already check if bot roll has sastified player claim
 
     playerNeeds = amountOfNum; // player claim Ex. three 1's
     if (num == 1) {
@@ -247,8 +250,7 @@ function calculatePlayerProbability() { // not accurate
 
     if (playerNeeds == 1) { // player needs to roll one of that value to sastify claim
         playerProbability += 1 - (5/6) ** playerDiceCount;
-    } else { //if (playerNeeds > 1 && playerNeeds < 7)
-        // console.log(`bot is caculating probabilty`);
+    } else { 
         /*
         The for loop comes from the equation 
 
@@ -284,7 +286,7 @@ function combination(value1, value2) {
 }
 
 function botRollMatchPlayerInput() {
-    for (let offset = 0; offset < botDiceCount; offset++) { // check if bot has player input 
+    for (let offset = 0; offset < botDiceCount; offset++) { // check if bot has player's guess 
         if (botRoll[offset] == num) {
             counter++ 
         }
@@ -293,7 +295,7 @@ function botRollMatchPlayerInput() {
 }
 
 
-function botCheckBotRoll() { // i think this works didn't check tho
+function botCheckBotRoll() { 
     // we have to reset values to make it work
     let botOnes = 0;
     let botTwos = 0;
@@ -303,7 +305,6 @@ function botCheckBotRoll() { // i think this works didn't check tho
     let botSixes = 0;
 
 
-    // console.log(`amount of 1's ${ones}`);
     for (let offset = 0; offset < botDiceCount; offset++) {
         if (botRoll[offset] == 1) {
             botOnes++;
@@ -473,7 +474,7 @@ function checkValidMove(move) {
         if (move != `call`) {
             if (validGuess.includes(move)) {
                 if (movesCalled.length == 0) { // if first move then 
-                    // console.log(`\nThis is the first move and gets a pass`);
+                    // This is the first move and gets a pass
                     movesCalled.push(move);
                     
                 } else { // if not first move 
@@ -491,11 +492,11 @@ function checkValidMove(move) {
         } else if (move == `call` && movesCalled.length == 0) {
             throw new Error(`Can't call on first move`);
         }
-    } catch { //catching error
+    } catch { //catching error we threw
         if (move == `valid guesses` || move ==  `valid guess` || move == ``) {
             console.log(displayValidMoves());
         } else {
-            console.log(`\nThat move is invalid or is lower than the perivous guess. Please first type the how many times you think a number appears and then the number. Or "call" if you want to call.\nEx. "one 1" or "three 4's" \nInput "Valid Guesses" for a list of valid guesses.\n`);
+            console.log(`\nThat guess is invalid or is lower than the perivous guess. Please first type the how many times you think a number appears and then the number. Or "call" if you want to call.\nEx. "one 1" (the number 1, appears one time) or "three 4's" (the number 4, appears three times)\n\nOr input "Valid Guesses" for a noncomprehensive list of valid guesses.\n`);
         }
         playerMove();
         checkValidMove(playerResponse);
@@ -546,16 +547,6 @@ function checkCall(lastMoveWas) {
             throw new Error(`How did we roll that?`);
         }
     }
-
-
-    // console.log(`\ntotalOnes ${totalOnes}`);
-    // console.log(`totalTwos ${totalTwos}`);
-    // console.log(`totalThrees ${totalThrees}`);
-    // console.log(`totalFours ${totalFours}`);
-    // console.log(`totalFives ${totalFives}`);
-    // console.log(`totalSixes ${totalSixes}`);
-    // console.log(`amountOfNum is ${amountOfNum}`);
-    // console.log(`num is ${num}`);
 
     if (lastMoveWas == `player`) { // check player vars
         console.log(`Bot: call \n`);
@@ -749,9 +740,11 @@ function printDiceValues() {
 }
 
 function resetGame() {
-    playerDiceCount = 5; // subj to change
+    playerDiceCount = 5; 
     playerRoll = [];
     playerResponse = ``; 
+
+    botDiceCount = 5;
 }
 
 function firstGoesAfterLoss() {
@@ -803,7 +796,17 @@ function tutorialSim() {
 
     cont();
 
-    console.log(`\nEach player takes turn guessing how many times a number is rolled (in total considering your known values and the opponent's unknown values). (Ex. "one 1" or "three 4's" | Note on Typing Your Guesses: First type how many times you think a number is rolled, followed by the actual number + 's)`);
+    console.log(`\nEach player takes turns guessing how many times a number is rolled in total (considering your known values and the opponent's unknown values).`);
+
+    cont();
+
+    console.log(`\nFor example a guess can be "one 2" (the number 2, is rolled one time in total) or "three 4's" (the number 4, appears three times in total)`);
+
+    cont();
+
+    console.log(`\nRemember when entering your guesses, first type how many times you think a number is rolled, followed by the actual number (+ 's if you think there's multiple of a number)`);
+
+    cont();
 
     console.log(`\nLet's see what your opponent guesses`);
     botResponse = bot(playerResponse)
@@ -813,7 +816,7 @@ function tutorialSim() {
 
     cont();
 
-    console.log(`\nYou can either "call" if you think your opponent's guess is "wrong" (Note: only overestimating how many times a number appears is wrong) or guess yourself, but your guess must be higher than the previous guess. (Ex. "one 5" is higher than "one 1" and "two 1's" is higher than "one 5"`);
+    console.log(`\nYou can either "call" if you think your opponent's guess is 'wrong' (Note: only overestimating how many times a number appears is 'wrong') or guess yourself, but your guess must be higher than the previous guess. (Ex. "one 5" is higher than "one 1" but "two 1's" is higher than "one 5"`);
     
     printDiceValues();
 
@@ -825,21 +828,23 @@ function tutorialSim() {
 
     if (playerResponse ==  `call`) {
         console.log(`\nYou decide to call!`);
+
+        console.log(`\nWhen someone calls out a guess all dice values are revealed and we check to see if the guess is 'wrong'. If the guess is 'wrong' the player who made the guess loses a dice. If the guess is 'right' the player who called the guess out loses a dice.\n`);
+
         cont();
 
-        console.log(`\nWhen someone calls out a guess all dice values are revealed and we check to see if the guess is "wrong". If the guess is wrong the player who made the guess loses a dice. If the guess is right the player who called the guess out loses a dice.`);
 
         loser = checkCall(`bot`);
 
         revealAllDice();
 
     } else {
-        console.log(`Let's see what the bot does!`);
+        console.log(`\nLet's see what the bot does!`);
         cont();
 
         console.log(`\nThe bot decides to call!`);
 
-        console.log(`\nWhen someone calls out a guess all dice values are revealed and we check to see if the guess is "wrong". If the guess is wrong the player who made the guess loses a dice. If the guess is right the player who called the guess out loses a dice.`);
+        console.log(`\nWhen someone calls out a guess all dice values are revealed and we check to see if the guess is 'wrong'. If the guess is 'wrong' the player who made the guess loses a dice. If the guess is 'right' the player who called the guess out loses a dice.\n`);
 
         // doesn't translate (bot usually does it but i don't wanna call it again) so this here
         amountOfNum = botTranslatePlayerPart1(); 
@@ -861,7 +866,7 @@ function tutorialSim() {
 
     cont();
 
-    console.log(`\nThe game ends when the opposing player loses all of their dice`);
+    console.log(`\nThe game ends when the one player loses all of their dice`);
 
     console.log(`\nNow that you know how to play, play the rest of this game!`);
 
@@ -954,7 +959,6 @@ function goodbye() {
 
 function main() {
     keepPlaying = `yes`;
-    // console.log(`******* NEW TEST *******`)
 
     welcome();
     while (keepPlaying ==  `yes`) {
