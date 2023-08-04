@@ -5,6 +5,7 @@ Comments should help explain code and disclaim stuff (but no promises future me!
 */
 
 // valid Guesses for 5 dices
+// Note: Higher index beats lower index (check rules for SwindleStone / Liar's Dice) 
 const validGuess = [ // This is me trying to make it not a mess | Future me, I'm sorry I didn't do this better
 `one 1`, `one 2`, `one 3`, `one 4`, `one 5`, `one 6`, 
 
@@ -31,8 +32,8 @@ const validGuess = [ // This is me trying to make it not a mess | Future me, I'm
 
 `call`
 ]
-// Note: Higher index beats lower index (check rules for SwindleStone / Liar's Dice) 
 
+// Scrapped idea for now
 // const dicePics = [
 //     ``, // so the indexes line up with the value of dice shown
 //     `_____
